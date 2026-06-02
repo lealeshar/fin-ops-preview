@@ -12,8 +12,9 @@ import {
 import type { Supervisor, CreateSupervisorInput, UpdateSupervisorInput } from '../types/domain.types';
 import type { FlexData } from '../types/domain.types';
 import type { CreateSupervisorFormValues, UpdateSupervisorFormValues } from '../schemas/supervisor.schema';
-import { EntityStatus } from '../types/enums';
+import { EntityStatus, FlexFieldEntityType } from '../types/enums';
 import { usePermission } from '../hooks/use-permission';
+import { useFlexFieldDefinitionsList } from '../hooks/use-flex-field-definitions';
 
 type ActiveModal =
   | { type: 'create' }
@@ -22,6 +23,8 @@ type ActiveModal =
 
 export function SupervisorsPage() {
   const { canCreate, canEdit, canArchive } = usePermission();
+  const { state: defsState } = useFlexFieldDefinitionsList(FlexFieldEntityType.Supervisor);
+  const definitions = defsState.status === 'success' ? defsState.data : [];
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -130,6 +133,7 @@ export function SupervisorsPage() {
       {activeModal?.type === 'create' && (
         <Modal title="מפקח חדש" onClose={closeModal}>
           <CreateSupervisorForm
+            definitions={definitions}
             onSubmit={handleCreate}
             onCancel={closeModal}
             submitting={createMut.state.status === 'loading'}
@@ -142,6 +146,7 @@ export function SupervisorsPage() {
         <Modal title={`עריכת ${activeModal.supervisor.name}`} onClose={closeModal}>
           <EditSupervisorForm
             supervisor={activeModal.supervisor}
+            definitions={definitions}
             onSubmit={values => handleUpdate(activeModal.supervisor, values)}
             onCancel={closeModal}
             submitting={updateMut.state.status === 'loading'}

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from '../ui/form-field';
 import { ErrorBanner } from '../ui/error-banner';
+import { FlexDataInput } from '../flex-fields/flex-data-input';
 import {
   createFactorySchema,
   updateFactorySchema,
@@ -9,25 +11,27 @@ import {
   type UpdateFactoryFormValues,
 } from '../../schemas/factory.schema';
 import { PaymentTerms, PaymentMethod } from '../../types/enums';
-import type { Factory } from '../../types/domain.types';
+import type { Factory, FlexData, FlexFieldDefinition } from '../../types/domain.types';
 import type { RpcError } from '../../types/async.types';
 
 // ─── Create form ──────────────────────────────────────────────────────────────
 
 interface CreateFactoryFormProps {
+  definitions: readonly FlexFieldDefinition[];
   onSubmit: (values: CreateFactoryFormValues) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
   error: RpcError | null;
 }
 
-export function CreateFactoryForm({ onSubmit, onCancel, submitting, error }: CreateFactoryFormProps) {
+export function CreateFactoryForm({ definitions, onSubmit, onCancel, submitting, error }: CreateFactoryFormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<CreateFactoryFormValues>({
     resolver: zodResolver(createFactorySchema),
   });
+  const [flexData, setFlexData] = useState<FlexData>({});
 
   return (
-    <form className="form" onSubmit={handleSubmit(onSubmit)}>
+    <form className="form" onSubmit={handleSubmit(v => onSubmit({ ...v, flex_data: flexData as Record<string, unknown> }))}>
       {error && <ErrorBanner error={error} />}
       <div className="form-row">
         <FormField label="שם מפעל" required error={errors.name?.message}>
@@ -74,6 +78,7 @@ export function CreateFactoryForm({ onSubmit, onCancel, submitting, error }: Cre
       <FormField label="כתובת" error={errors.address?.message}>
         <textarea className="form-textarea" rows={2} {...register('address')} />
       </FormField>
+      <FlexDataInput definitions={definitions} initialData={null} onChange={setFlexData} />
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>ביטול</button>
         <button type="submit" className="btn btn-primary" disabled={submitting}>
@@ -88,13 +93,14 @@ export function CreateFactoryForm({ onSubmit, onCancel, submitting, error }: Cre
 
 interface EditFactoryFormProps {
   factory: Factory;
+  definitions: readonly FlexFieldDefinition[];
   onSubmit: (values: UpdateFactoryFormValues) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
   error: RpcError | null;
 }
 
-export function EditFactoryForm({ factory, onSubmit, onCancel, submitting, error }: EditFactoryFormProps) {
+export function EditFactoryForm({ factory, definitions, onSubmit, onCancel, submitting, error }: EditFactoryFormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<UpdateFactoryFormValues>({
     resolver: zodResolver(updateFactorySchema),
     defaultValues: {
@@ -109,9 +115,10 @@ export function EditFactoryForm({ factory, onSubmit, onCancel, submitting, error
       external_customer_id: factory.external_customer_id ?? undefined,
     },
   });
+  const [flexData, setFlexData] = useState<FlexData>(factory.flex_data ?? {});
 
   return (
-    <form className="form" onSubmit={handleSubmit(onSubmit)}>
+    <form className="form" onSubmit={handleSubmit(v => onSubmit({ ...v, flex_data: flexData as Record<string, unknown> }))}>
       {error && <ErrorBanner error={error} />}
       <div className="form-row">
         <FormField label="שם מפעל" error={errors.name?.message}>
@@ -156,6 +163,7 @@ export function EditFactoryForm({ factory, onSubmit, onCancel, submitting, error
       <FormField label="כתובת" error={errors.address?.message}>
         <textarea className="form-textarea" rows={2} {...register('address')} />
       </FormField>
+      <FlexDataInput definitions={definitions} initialData={factory.flex_data} onChange={setFlexData} />
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>ביטול</button>
         <button type="submit" className="btn btn-primary" disabled={submitting}>

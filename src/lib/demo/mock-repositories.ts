@@ -4,6 +4,7 @@ import type {
   Supervisor,
   Job,
   FinancialEvent,
+  FlexFieldDefinition,
   DashboardStats,
   PaginatedResult,
   RpcResponse,
@@ -202,9 +203,30 @@ const mockFinancialEvents = {
     } as FinancialEvent),
 };
 
+const FLEX_DEFS: FlexFieldDefinition[] = [
+  {
+    id: 'ffd-1', organization_id: ORG, created_at: NOW, updated_at: NOW, version_number: 1,
+    entity_type: 'factory', field_key: 'website_url', label: 'כתובת אתר',
+    field_type: 'string', display_order: 1, is_required: false, enum_options: null,
+  },
+  {
+    id: 'ffd-2', organization_id: ORG, created_at: NOW, updated_at: NOW, version_number: 1,
+    entity_type: 'factory', field_key: 'industry_type', label: 'סוג תעשייה',
+    field_type: 'enum', display_order: 2, is_required: false,
+    enum_options: ['טקסטיל', 'מזון', 'אלקטרוניקה', 'בנייה', 'אחר'],
+  },
+  {
+    id: 'ffd-3', organization_id: ORG, created_at: NOW, updated_at: NOW, version_number: 1,
+    entity_type: 'supervisor', field_key: 'years_experience', label: 'שנות ניסיון',
+    field_type: 'numeric', display_order: 1, is_required: false, enum_options: null,
+  },
+];
+
 const mockFlexFieldDefinitions = {
-  list: async () => ok([] as ReturnType<typeof Array>[]),
-  upsert: async () => ok(null as unknown),
+  list: async (entityType?: string) => ok(
+    entityType ? FLEX_DEFS.filter(d => d.entity_type === entityType) : FLEX_DEFS,
+  ),
+  upsert: async (input: unknown) => ok({ ...FLEX_DEFS[0]!, ...(input as object) } as FlexFieldDefinition),
 };
 
 const mockSystemSettings = {

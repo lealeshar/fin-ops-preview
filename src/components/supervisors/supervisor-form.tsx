@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from '../ui/form-field';
 import { ErrorBanner } from '../ui/error-banner';
+import { FlexDataInput } from '../flex-fields/flex-data-input';
 import {
   createSupervisorSchema,
   updateSupervisorSchema,
@@ -9,25 +11,27 @@ import {
   type UpdateSupervisorFormValues,
 } from '../../schemas/supervisor.schema';
 import { PaymentType } from '../../types/enums';
-import type { Supervisor } from '../../types/domain.types';
+import type { Supervisor, FlexData, FlexFieldDefinition } from '../../types/domain.types';
 import type { RpcError } from '../../types/async.types';
 
 // ─── Create form ──────────────────────────────────────────────────────────────
 
 interface CreateSupervisorFormProps {
+  definitions: readonly FlexFieldDefinition[];
   onSubmit: (values: CreateSupervisorFormValues) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
   error: RpcError | null;
 }
 
-export function CreateSupervisorForm({ onSubmit, onCancel, submitting, error }: CreateSupervisorFormProps) {
+export function CreateSupervisorForm({ definitions, onSubmit, onCancel, submitting, error }: CreateSupervisorFormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<CreateSupervisorFormValues>({
     resolver: zodResolver(createSupervisorSchema),
   });
+  const [flexData, setFlexData] = useState<FlexData>({});
 
   return (
-    <form className="form" onSubmit={handleSubmit(onSubmit)}>
+    <form className="form" onSubmit={handleSubmit(v => onSubmit({ ...v, flex_data: flexData as Record<string, unknown> }))}>
       {error && <ErrorBanner error={error} />}
       <div className="form-row">
         <FormField label="שם" required error={errors.name?.message}>
@@ -77,6 +81,7 @@ export function CreateSupervisorForm({ onSubmit, onCancel, submitting, error }: 
       <FormField label="כתובת" error={errors.address?.message}>
         <textarea className="form-textarea" rows={2} {...register('address')} />
       </FormField>
+      <FlexDataInput definitions={definitions} initialData={null} onChange={setFlexData} />
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>ביטול</button>
         <button type="submit" className="btn btn-primary" disabled={submitting}>
@@ -91,13 +96,14 @@ export function CreateSupervisorForm({ onSubmit, onCancel, submitting, error }: 
 
 interface EditSupervisorFormProps {
   supervisor: Supervisor;
+  definitions: readonly FlexFieldDefinition[];
   onSubmit: (values: UpdateSupervisorFormValues) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
   error: RpcError | null;
 }
 
-export function EditSupervisorForm({ supervisor, onSubmit, onCancel, submitting, error }: EditSupervisorFormProps) {
+export function EditSupervisorForm({ supervisor, definitions, onSubmit, onCancel, submitting, error }: EditSupervisorFormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<UpdateSupervisorFormValues>({
     resolver: zodResolver(updateSupervisorSchema),
     defaultValues: {
@@ -114,9 +120,10 @@ export function EditSupervisorForm({ supervisor, onSubmit, onCancel, submitting,
       bank_account_type:   supervisor.bank_account_type ?? undefined,
     },
   });
+  const [flexData, setFlexData] = useState<FlexData>(supervisor.flex_data ?? {});
 
   return (
-    <form className="form" onSubmit={handleSubmit(onSubmit)}>
+    <form className="form" onSubmit={handleSubmit(v => onSubmit({ ...v, flex_data: flexData as Record<string, unknown> }))}>
       {error && <ErrorBanner error={error} />}
       <div className="form-row">
         <FormField label="שם" error={errors.name?.message}>
@@ -166,6 +173,7 @@ export function EditSupervisorForm({ supervisor, onSubmit, onCancel, submitting,
       <FormField label="כתובת" error={errors.address?.message}>
         <textarea className="form-textarea" rows={2} {...register('address')} />
       </FormField>
+      <FlexDataInput definitions={definitions} initialData={supervisor.flex_data} onChange={setFlexData} />
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={submitting}>ביטול</button>
         <button type="submit" className="btn btn-primary" disabled={submitting}>

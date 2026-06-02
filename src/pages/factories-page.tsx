@@ -12,8 +12,9 @@ import {
 import type { Factory, CreateFactoryInput, UpdateFactoryInput } from '../types/domain.types';
 import type { FlexData } from '../types/domain.types';
 import type { CreateFactoryFormValues, UpdateFactoryFormValues } from '../schemas/factory.schema';
-import { EntityStatus } from '../types/enums';
+import { EntityStatus, FlexFieldEntityType } from '../types/enums';
 import { usePermission } from '../hooks/use-permission';
+import { useFlexFieldDefinitionsList } from '../hooks/use-flex-field-definitions';
 
 type ActiveModal =
   | { type: 'create' }
@@ -22,6 +23,8 @@ type ActiveModal =
 
 export function FactoriesPage() {
   const { canCreate, canEdit, canArchive } = usePermission();
+  const { state: defsState } = useFlexFieldDefinitionsList(FlexFieldEntityType.Factory);
+  const definitions = defsState.status === 'success' ? defsState.data : [];
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -126,6 +129,7 @@ export function FactoriesPage() {
       {activeModal?.type === 'create' && (
         <Modal title="מפעל חדש" onClose={closeModal}>
           <CreateFactoryForm
+            definitions={definitions}
             onSubmit={handleCreate}
             onCancel={closeModal}
             submitting={createMut.state.status === 'loading'}
@@ -138,6 +142,7 @@ export function FactoriesPage() {
         <Modal title={`עריכת ${activeModal.factory.name}`} onClose={closeModal}>
           <EditFactoryForm
             factory={activeModal.factory}
+            definitions={definitions}
             onSubmit={values => handleUpdate(activeModal.factory, values)}
             onCancel={closeModal}
             submitting={updateMut.state.status === 'loading'}

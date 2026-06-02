@@ -91,6 +91,16 @@ body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color
 .detail-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .detail-section-header h2 { font-size: 14px; font-weight: 600; }
 
+/* Page tabs */
+.page-tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; gap: 0; }
+.page-tab  { background: none; border: none; padding: 10px 20px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+.page-tab:hover:not(.active) { color: #1e293b; }
+.page-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+/* Flex fields inline section */
+.flex-fields-section { margin-top: 8px; }
+.flex-fields-divider { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .5px; padding: 10px 0 6px; border-top: 1px solid #f1f5f9; margin-top: 6px; }
+
 /* Nav user info */
 .nav-user { display: flex; align-items: center; gap: 8px; margin-inline-end: 8px; }
 .nav-email { font-size: 12px; color: #94a3b8; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
