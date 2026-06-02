@@ -13,6 +13,7 @@ import type { Factory, CreateFactoryInput, UpdateFactoryInput } from '../types/d
 import type { FlexData } from '../types/domain.types';
 import type { CreateFactoryFormValues, UpdateFactoryFormValues } from '../schemas/factory.schema';
 import { EntityStatus } from '../types/enums';
+import { usePermission } from '../hooks/use-permission';
 
 type ActiveModal =
   | { type: 'create' }
@@ -20,6 +21,7 @@ type ActiveModal =
   | null;
 
 export function FactoriesPage() {
+  const { canCreate, canEdit, canArchive } = usePermission();
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -82,12 +84,14 @@ export function FactoriesPage() {
     <div className="page">
       <div className="page-header">
         <h1>מפעלים</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => { createMut.reset(); setActiveModal({ type: 'create' }); }}
-        >
-          + מפעל חדש
-        </button>
+        {canCreate && (
+          <button
+            className="btn btn-primary"
+            onClick={() => { createMut.reset(); setActiveModal({ type: 'create' }); }}
+          >
+            + מפעל חדש
+          </button>
+        )}
       </div>
 
       {listState.status === 'error' && <ErrorBanner error={listState.error} />}
@@ -115,8 +119,8 @@ export function FactoriesPage() {
       <FactoriesTable
         factories={factories}
         loading={loading}
-        onEdit={factory => { updateMut.reset(); setActiveModal({ type: 'edit', factory }); }}
-        onArchive={handleArchive}
+        onEdit={canEdit    ? factory => { updateMut.reset(); setActiveModal({ type: 'edit', factory }); } : undefined}
+        onArchive={canArchive ? handleArchive : undefined}
       />
 
       {activeModal?.type === 'create' && (

@@ -25,8 +25,8 @@ interface SettingsTableProps {
   settings: readonly SystemSetting[];
   loading: boolean;
   togglingKeys: ReadonlySet<string>;
-  onEdit: (setting: SystemSetting) => void;
-  onToggle: (setting: SystemSetting) => void;
+  onEdit?: ((setting: SystemSetting) => void) | undefined;
+  onToggle?: ((setting: SystemSetting) => void) | undefined;
 }
 
 export function SettingsTable({
@@ -79,8 +79,8 @@ export function SettingsTable({
                     <input
                       type="checkbox"
                       checked={flagData.enabled}
-                      disabled={isToggling}
-                      onChange={() => onToggle(s)}
+                      disabled={isToggling || !onToggle}
+                      onChange={() => onToggle?.(s)}
                     />
                     <span className={`toggle-track${flagData.enabled ? ' on' : ''}`}>
                       <span className="toggle-thumb" />
@@ -101,9 +101,11 @@ export function SettingsTable({
                 {formatDate(s.updated_at)}
               </td>
               <td>
-                <button className="btn btn-ghost btn-sm" onClick={() => onEdit(s)}>
-                  ערוך
-                </button>
+                {onEdit && (
+                  <button className="btn btn-ghost btn-sm" onClick={() => onEdit(s)}>
+                    ערוך
+                  </button>
+                )}
               </td>
             </tr>
           );

@@ -13,6 +13,7 @@ import type { Supervisor, CreateSupervisorInput, UpdateSupervisorInput } from '.
 import type { FlexData } from '../types/domain.types';
 import type { CreateSupervisorFormValues, UpdateSupervisorFormValues } from '../schemas/supervisor.schema';
 import { EntityStatus } from '../types/enums';
+import { usePermission } from '../hooks/use-permission';
 
 type ActiveModal =
   | { type: 'create' }
@@ -20,6 +21,7 @@ type ActiveModal =
   | null;
 
 export function SupervisorsPage() {
+  const { canCreate, canEdit, canArchive } = usePermission();
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -86,12 +88,14 @@ export function SupervisorsPage() {
     <div className="page">
       <div className="page-header">
         <h1>מפקחים</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => { createMut.reset(); setActiveModal({ type: 'create' }); }}
-        >
-          + מפקח חדש
-        </button>
+        {canCreate && (
+          <button
+            className="btn btn-primary"
+            onClick={() => { createMut.reset(); setActiveModal({ type: 'create' }); }}
+          >
+            + מפקח חדש
+          </button>
+        )}
       </div>
 
       {listState.status === 'error' && <ErrorBanner error={listState.error} />}
@@ -119,8 +123,8 @@ export function SupervisorsPage() {
       <SupervisorsTable
         supervisors={supervisors}
         loading={loading}
-        onEdit={supervisor => { updateMut.reset(); setActiveModal({ type: 'edit', supervisor }); }}
-        onArchive={handleArchive}
+        onEdit={canEdit    ? supervisor => { updateMut.reset(); setActiveModal({ type: 'edit', supervisor }); } : undefined}
+        onArchive={canArchive ? handleArchive : undefined}
       />
 
       {activeModal?.type === 'create' && (

@@ -9,8 +9,8 @@ const col = createColumnHelper<Supervisor>();
 interface SupervisorsTableProps {
   supervisors: readonly Supervisor[];
   loading: boolean;
-  onEdit: (supervisor: Supervisor) => void;
-  onArchive: (supervisor: Supervisor) => void;
+  onEdit?: ((supervisor: Supervisor) => void) | undefined;
+  onArchive?: ((supervisor: Supervisor) => void) | undefined;
 }
 
 export function SupervisorsTable({ supervisors, loading, onEdit, onArchive }: SupervisorsTableProps) {
@@ -29,8 +29,10 @@ export function SupervisorsTable({ supervisors, loading, onEdit, onArchive }: Su
       header: '',
       cell: i => (
         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => onEdit(i.row.original)}>עריכה</button>
-          {!i.row.original.is_deleted && (
+          {onEdit && (
+            <button className="btn btn-ghost btn-sm" onClick={() => onEdit(i.row.original)}>עריכה</button>
+          )}
+          {onArchive && !i.row.original.is_deleted && (
             <button className="btn btn-danger btn-sm" onClick={() => onArchive(i.row.original)}>ארכיון</button>
           )}
         </div>

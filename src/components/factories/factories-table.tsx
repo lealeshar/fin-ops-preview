@@ -9,8 +9,8 @@ const col = createColumnHelper<Factory>();
 interface FactoriesTableProps {
   factories: readonly Factory[];
   loading: boolean;
-  onEdit: (factory: Factory) => void;
-  onArchive: (factory: Factory) => void;
+  onEdit?: ((factory: Factory) => void) | undefined;
+  onArchive?: ((factory: Factory) => void) | undefined;
 }
 
 export function FactoriesTable({ factories, loading, onEdit, onArchive }: FactoriesTableProps) {
@@ -26,8 +26,10 @@ export function FactoriesTable({ factories, loading, onEdit, onArchive }: Factor
       header: '',
       cell: i => (
         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => onEdit(i.row.original)}>עריכה</button>
-          {!i.row.original.is_deleted && (
+          {onEdit && (
+            <button className="btn btn-ghost btn-sm" onClick={() => onEdit(i.row.original)}>עריכה</button>
+          )}
+          {onArchive && !i.row.original.is_deleted && (
             <button className="btn btn-danger btn-sm" onClick={() => onArchive(i.row.original)}>ארכיון</button>
           )}
         </div>

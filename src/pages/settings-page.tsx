@@ -13,6 +13,7 @@ import {
 } from '../hooks/use-system-settings';
 import type { SystemSetting } from '../types/domain.types';
 import type { CreateSettingFormValues, EditFlagFormValues, EditValueFormValues } from '../schemas/system-setting.schema';
+import { usePermission } from '../hooks/use-permission';
 
 type ActiveModal =
   | { type: 'create' }
@@ -20,6 +21,7 @@ type ActiveModal =
   | null;
 
 export function SettingsPage() {
+  const { canManageSettings } = usePermission();
   const [activeModal, setActiveModal]   = useState<ActiveModal>(null);
   const [typeFilter, setTypeFilter]     = useState('');
   const [togglingKeys, setTogglingKeys] = useState<ReadonlySet<string>>(new Set<string>());
@@ -89,12 +91,14 @@ export function SettingsPage() {
     <div className="page">
       <div className="page-header">
         <h1>הגדרות מערכת</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => { upsertMut.reset(); setActiveModal({ type: 'create' }); }}
-        >
-          + הגדרה חדשה
-        </button>
+        {canManageSettings && (
+          <button
+            className="btn btn-primary"
+            onClick={() => { upsertMut.reset(); setActiveModal({ type: 'create' }); }}
+          >
+            + הגדרה חדשה
+          </button>
+        )}
       </div>
 
       {listState.status === 'error' && <ErrorBanner error={listState.error} />}
@@ -118,8 +122,8 @@ export function SettingsPage() {
         settings={settings}
         loading={loading}
         togglingKeys={togglingKeys}
-        onEdit={s => { upsertMut.reset(); setActiveModal({ type: 'edit', setting: s }); }}
-        onToggle={handleToggle}
+        onEdit={canManageSettings ? s => { upsertMut.reset(); setActiveModal({ type: 'edit', setting: s }); } : undefined}
+        onToggle={canManageSettings ? handleToggle : undefined}
       />
 
       {activeModal?.type === 'create' && (

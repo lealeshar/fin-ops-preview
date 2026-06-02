@@ -8,12 +8,14 @@ import { useJobList, useCreateJob } from '../hooks/use-jobs';
 import type { Job, CreateJobInput } from '../types/domain.types';
 import type { CreateJobFormValues } from '../schemas/job.schema';
 import { OperationalStatus, AccountingStatus } from '../types/enums';
+import { usePermission } from '../hooks/use-permission';
 
 const MONTHS_SHORT = ['ינו','פבר','מרץ','אפר','מאי','יוני','יולי','אוג','ספט','אוק','נוב','דצמ'];
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - 2 + i);
 
 export function JobsPage() {
+  const { canCreate } = usePermission();
   const [showCreate, setShowCreate]     = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [opFilter,  setOpFilter]  = useState('');
@@ -56,12 +58,14 @@ export function JobsPage() {
     <div className="page">
       <div className="page-header">
         <h1>עבודות</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => { createMut.reset(); setShowCreate(true); }}
-        >
-          + עבודה חדשה
-        </button>
+        {canCreate && (
+          <button
+            className="btn btn-primary"
+            onClick={() => { createMut.reset(); setShowCreate(true); }}
+          >
+            + עבודה חדשה
+          </button>
+        )}
       </div>
 
       {listState.status === 'error' && <ErrorBanner error={listState.error} />}

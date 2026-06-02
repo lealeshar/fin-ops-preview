@@ -9,6 +9,7 @@ import { useJobById, useAdvanceOperationalStatus, useAdvanceAccountingStatus } f
 import { useFinancialEventsByJob, useAppendFinancialEvent } from '../../hooks/use-financial-events';
 import { NEXT_OPERATIONAL, NEXT_ACCOUNTING, STATUS_LABELS } from '../../utils/transitions';
 import { IMMUTABLE_ACCOUNTING_STATUSES } from '../../types/enums';
+import { usePermission } from '../../hooks/use-permission';
 import type { FinancialEvent } from '../../types/domain.types';
 import type { AccountingStatus, OperationalStatus } from '../../types/enums';
 import type { AppendFinancialEventFormValues } from '../../schemas/financial-event.schema';
@@ -31,6 +32,7 @@ interface JobDetailProps {
 }
 
 export function JobDetail({ jobId, onClose }: JobDetailProps) {
+  const { canEdit, canApprovePay } = usePermission();
   const [showAppendModal, setShowAppendModal] = useState(false);
 
   const { state: jobState, reload: reloadJob } = useJobById(jobId);
@@ -106,9 +108,12 @@ export function JobDetail({ jobId, onClose }: JobDetailProps) {
       {advanceOp.state.status  === 'error' && <ErrorBanner error={advanceOp.state.error}  />}
       {advanceAcc.state.status === 'error' && <ErrorBanner error={advanceAcc.state.error} />}
 
-      {!isImmutable && (nextOpStatuses.length > 0 || nextAccStatuses.length > 0) && (
+      {!isImmutable && (
+        (canEdit && nextOpStatuses.length > 0) ||
+        (canApprovePay && nextAccStatuses.length > 0)
+      ) && (
         <div className="detail-actions">
-          {nextOpStatuses.map(s => (
+          {canEdit && nextOpStatuses.map(s => (
             <button
               key={s}
               className="btn btn-ghost btn-sm"
@@ -118,7 +123,7 @@ export function JobDetail({ jobId, onClose }: JobDetailProps) {
               → {STATUS_LABELS[s] ?? s}
             </button>
           ))}
-          {nextAccStatuses.map(s => (
+          {canApprovePay && nextAccStatuses.map(s => (
             <button
               key={s}
               className="btn btn-primary btn-sm"
@@ -136,7 +141,7 @@ export function JobDetail({ jobId, onClose }: JobDetailProps) {
 
       <div className="detail-section-header" style={{ marginTop: 20 }}>
         <h2>אירועים פיננסיים ({eventsState.status === 'success' ? eventsState.data.total_count : '…'})</h2>
-        {!isImmutable && (
+        {!isImmutable && canApprovePay && (
           <button
             className="btn btn-primary btn-sm"
             onClick={() => { appendEvt.reset(); setShowAppendModal(true); }}
