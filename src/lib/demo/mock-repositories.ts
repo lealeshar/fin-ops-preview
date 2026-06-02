@@ -4,6 +4,7 @@ import type {
   Supervisor,
   Job,
   FinancialEvent,
+  DashboardStats,
   PaginatedResult,
   RpcResponse,
 } from '../../types/domain.types';
@@ -211,6 +212,18 @@ const mockSystemSettings = {
   upsert: async () => ok(undefined as void),
 };
 
+const mockDashboard = {
+  getStats: async (): Promise<RpcResponse<DashboardStats>> => ok({
+    jobs_by_operational_status:  { Draft: 1, Waiting_Match: 1, Partial_Match: 1, Matched: 2 },
+    jobs_by_accounting_status:   { Pending_Approval: 3, Approved: 1, Paid: 1 },
+    active_factories:            2,
+    active_supervisors:          3,
+    total_jobs:                  5,
+    total_factory_charges:       66720,
+    total_supervisor_payouts:    55600,
+  }),
+};
+
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 export function createMockRepositories(): Repositories {
@@ -221,5 +234,6 @@ export function createMockRepositories(): Repositories {
     financialEvents:      mockFinancialEvents,
     flexFieldDefinitions: mockFlexFieldDefinitions,
     systemSettings:       mockSystemSettings,
+    dashboard:            mockDashboard,
   } as unknown as Repositories;
 }

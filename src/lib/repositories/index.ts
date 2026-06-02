@@ -11,4 +11,5 @@ export { JobsRepository }                 from './jobs.repository';
 export { FinancialEventsRepository }      from './financial-events.repository';
 export { FlexFieldDefinitionsRepository } from './flex-field-definitions.repository';
 export { SystemSettingsRepository }       from './system-settings.repository';
+export { DashboardRepository }            from './dashboard.repository';
 export { createRepositories }             from './create-repositories';

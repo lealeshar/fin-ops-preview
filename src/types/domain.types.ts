@@ -182,6 +182,18 @@ export interface PaginatedResult<T> {
   readonly total_count: number;
 }
 
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  readonly jobs_by_operational_status:  Partial<Record<string, number>>;
+  readonly jobs_by_accounting_status:   Partial<Record<string, number>>;
+  readonly active_factories:            number;
+  readonly active_supervisors:          number;
+  readonly total_jobs:                  number;
+  readonly total_factory_charges:       number;
+  readonly total_supervisor_payouts:    number;
+}
+
 // ─── Audit ────────────────────────────────────────────────────────────────────
 
 export interface AuditLog {
